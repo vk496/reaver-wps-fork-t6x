@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
     int source = INTERFACE, ret_val = EXIT_FAILURE;
     struct bpf_program bpf = {0};
     char *out_file = NULL, *last_optarg = NULL, *target = NULL, *bssid = NULL;
-    char *short_options = "i:c:n:o:b:5sfuCDhPg";
+    char *short_options = "i:c:n:o:b:m:5sfuCDhPg";
     struct option long_options[] = {
         { "get-chipset", no_argument, NULL, 'g'},
         { "output-piped", no_argument, NULL, 'P'},
@@ -59,6 +59,7 @@ int main(int argc, char *argv[]) {
         { "5ghz", no_argument, NULL, '5'},
         { "scan", no_argument, NULL, 's'},
         { "survey", no_argument, NULL, 'u'},
+        { "mac", required_argument, NULL, 'm'},
         { "help", no_argument, NULL, 'h'},
         { 0, 0, 0, 0}
     };
@@ -122,6 +123,9 @@ int main(int argc, char *argv[]) {
             case 'D':
                 daemonize();
                 break;
+            case 'm':
+                set_filter_mac(optarg);
+                break;
             default:
                 usage(argv[0]);
                 goto end;
@@ -156,6 +160,11 @@ int main(int argc, char *argv[]) {
     if (get_iface() && source == PCAP_FILE) {
         cprintf(CRITICAL, "[X] ERROR: -i and -f options cannot be used together.\n");
         usage(argv[0]);
+        goto end;
+    }
+
+    if (get_filter_mac() && !is_valid_filter_mac(get_filter_mac())) {
+        cprintf(CRITICAL, "[X] ERROR: -m have a invalid MAC pattern\n");
         goto end;
     }
 
@@ -345,8 +354,13 @@ void parse_wps_settings(const u_char *packet, struct pcap_pkthdr *header, char *
                     send_probe_request(get_bssid(), get_ssid());
                     probe_sent = 1;
                 }
+                int filter = 1; //true
 
-                if (!insert(bssid, ssid, wps, encryption, rssi)) {
+                if (get_filter_mac() && strncasecmp(bssid, get_filter_mac(), strlen(get_filter_mac())) != 0) {
+                    filter = 0;
+                }
+
+                if (filter && !insert(bssid, ssid, wps, encryption, rssi)) {
                     update(bssid, ssid, wps, encryption);
                 } else if (wps->version > 0) {
                     switch (wps->locked) {
@@ -450,18 +464,19 @@ void parse_wps_settings(const u_char *packet, struct pcap_pkthdr *header, char *
 
                     }
 
-
-                    if (o_file_p == 0) {
-                        cprintf(INFO, "%17s     %2d      %.2d      %d.%d       %s     %s\n", bssid, channel, rssi, (wps->version >> 4), (wps->version & 0x0F), lock_display, ssid);
-                    } else {
-                        if (get_chipset_output == 1) {
-                            cprintf(INFO, "%17s|%2d|%.2d|%d.%d|%s|%s|%s|%s|%s\n", bssid, channel, rssi, (wps->version >> 4), (wps->version & 0x0F), lock_display, ssid, info_manufac, info_modelnum, info_modelserial);
-
+                    if (filter) {
+                        if (o_file_p == 0) {
+                            cprintf(INFO, "%17s     %2d      %.2d      %d.%d       %s     %s\n", bssid, channel, rssi, (wps->version >> 4), (wps->version & 0x0F), lock_display, ssid);
                         } else {
-                            cprintf(INFO, "%17s|%2d|%.2d|%d.%d|%s|%s\n", bssid, channel, rssi, (wps->version >> 4), (wps->version & 0x0F), lock_display, ssid);
+                            if (get_chipset_output == 1) {
+                                cprintf(INFO, "%17s|%2d|%.2d|%d.%d|%s|%s|%s|%s|%s\n", bssid, channel, rssi, (wps->version >> 4), (wps->version & 0x0F), lock_display, ssid, info_manufac, info_modelnum, info_modelserial);
+
+                            } else {
+                                cprintf(INFO, "%17s|%2d|%.2d|%d.%d|%s|%s\n", bssid, channel, rssi, (wps->version >> 4), (wps->version & 0x0F), lock_display, ssid);
+
+                            }
 
                         }
-
                     }
                 }
 
@@ -531,6 +546,7 @@ void usage(char *prog) {
     fprintf(stderr, "\t-u, --survey                         Use survey mode [default]\n");
     fprintf(stderr, "\t-P, --output-piped                   Allows Wash output to be piped. Example. wash x|y|z...\n");
     fprintf(stderr, "\t-g, --get-chipset                    Pipes output and runs reaver alongside to get chipset\n");
+    fprintf(stderr, "\t-m, --mac                            Filter by mac address. Example. wash -m 00:11:22\n");
     fprintf(stderr, "\t-h, --help                           Show help\n");
 
     fprintf(stderr, "\nExample:\n");

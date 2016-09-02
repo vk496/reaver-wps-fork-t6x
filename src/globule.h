@@ -157,6 +157,7 @@ struct globals {
     int stop_in_m1; /* stop reaver in m1 message */
     int op_gen_pin; /* gen default pin */
 
+    char *mac_filter; /* filter results by mac */
 
 } *globule;
 
@@ -281,6 +282,7 @@ void set_pixie_log(int value);
 int get_pixie_log();
 void set_stop_in_m1(int index);
 void set_quit_pin_attempts(int value);
-
+void set_filter_mac(char * mac);
+char * get_filter_mac();
 
 #endif

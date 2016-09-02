@@ -560,10 +560,10 @@ int pingen_zhaochunsheng(char *mac, int add) {
     temp[6] = '\0';
     sscanf(temp, "%x", &default_pin);
     default_pin = default_pin % 10000000;
-    
+
     char * p = NULL;
     sprintf(p, "%d", pin); //int to *char
-    
+
     snprintf(p, pin_len, "%08d", (default_pin * 10) + wps_checksum(default_pin));
     return pin;
 }
@@ -580,5 +580,30 @@ int pingen_zyxel(char *mac, int add) {
 
     pin = (hexToInt(mac_address) + add) % 10000000;
 
-    return (pin * 10) + wps_pin_checksum(pin);
+    return (pin * 10) +wps_pin_checksum(pin);
+}
+
+/**
+ * Check if string is a complete mac or sub string of a mac
+ * @param mac string with mac filter
+ * @return 0 if valid
+ */
+int is_valid_filter_mac(const char* mac) {
+    int i = 0;
+    int s = 0;
+
+    while (*mac) {
+        if (isxdigit(*mac)) {
+            i++;
+        } else if (*mac == ':' || *mac == '-') {
+            if (i == 0 || i / 2 - 1 != s)
+                break;
+            ++s;
+        } else {
+            s = -1;
+        }
+        ++mac;
+    }
+
+    return (s == (i / 2) - 1) && (i <= 12);
 }

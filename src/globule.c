@@ -607,3 +607,11 @@ void set_cmd_reaver_test(char *string) {
         }
      */
 }
+
+void set_filter_mac(char * mac) {
+    globule->mac_filter = mac;
+}
+
+char * get_filter_mac() {
+    return globule->mac_filter;
+}
