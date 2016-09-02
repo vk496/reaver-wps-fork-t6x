@@ -158,6 +158,8 @@ struct globals {
     int op_gen_pin; /* gen default pin */
 
     char *mac_filter; /* filter results by mac */
+    int essid_strict; /* case sensitive for essid filter. 0 false, 1 true */
+    char * essid_fiter; /* filter results by ESSID */
 
 } *globule;
 
@@ -284,5 +286,9 @@ void set_stop_in_m1(int index);
 void set_quit_pin_attempts(int value);
 void set_filter_mac(char * mac);
 char * get_filter_mac();
+void set_filter_essid(char * essid);
+char * get_filter_essid();
+void set_filter_strict_essid(int value);
+int get_filter_strict_essid();
 
 #endif

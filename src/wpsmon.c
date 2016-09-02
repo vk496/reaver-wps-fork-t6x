@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
     int source = INTERFACE, ret_val = EXIT_FAILURE;
     struct bpf_program bpf = {0};
     char *out_file = NULL, *last_optarg = NULL, *target = NULL, *bssid = NULL;
-    char *short_options = "i:c:n:o:b:m:5sfuCDhPg";
+    char *short_options = "i:c:n:o:b:m:e:E:5sfuCDhPg";
     struct option long_options[] = {
         { "get-chipset", no_argument, NULL, 'g'},
         { "output-piped", no_argument, NULL, 'P'},
@@ -60,6 +60,8 @@ int main(int argc, char *argv[]) {
         { "scan", no_argument, NULL, 's'},
         { "survey", no_argument, NULL, 'u'},
         { "mac", required_argument, NULL, 'm'},
+        { "essid", required_argument, NULL, 'e'},
+        { "essid-strict", required_argument, NULL, 'E'},
         { "help", no_argument, NULL, 'h'},
         { 0, 0, 0, 0}
     };
@@ -78,6 +80,7 @@ int main(int argc, char *argv[]) {
     set_validate_fcs(0); //mod by flatr0ze
     set_log_file(stdout);
     set_max_num_probes(DEFAULT_MAX_NUM_PROBES);
+    int essid_filter[] = {0, 0}; /* Avoid multiple redefinitions */
 
     while ((c = getopt_long(argc, argv, short_options, long_options, &long_opt_index)) != -1) {
         switch (c) {
@@ -126,6 +129,16 @@ int main(int argc, char *argv[]) {
             case 'm':
                 set_filter_mac(optarg);
                 break;
+            case 'e':
+                set_filter_essid(optarg);
+                set_filter_strict_essid(0);
+                essid_filter[0]++;
+                break;
+            case 'E':
+                set_filter_essid(optarg);
+                set_filter_strict_essid(1);
+                essid_filter[1]++;
+                break;
             default:
                 usage(argv[0]);
                 goto end;
@@ -145,7 +158,7 @@ int main(int argc, char *argv[]) {
         printf("\nWash v%s WiFi Protected Setup Scan Tool\n", PACKAGE_VERSION);
         printf("Copyright (c) 2011, Tactical Network Solutions, Craig Heffner <cheffner@tacnetsol.com>\n");
         printf("t6_x <t6_x@hotmail.com> & DataHead & Soxrok2212 & Wiire & AAnarchYY & KokoSoft fork\n");
-        printf("MOD by vk496 for www.seguridadwireless.net\n\n");
+        printf("MOD by \033[1;34mvk496\033[0m for \033[1;31mwww.seguridadwireless.net\033[0m\n\n");
     }
 
     /* The interface value won't be set if capture files were specified; else, there should have been an interface specified */
@@ -166,6 +179,19 @@ int main(int argc, char *argv[]) {
     if (get_filter_mac() && !is_valid_filter_mac(get_filter_mac())) {
         cprintf(CRITICAL, "[X] ERROR: -m have a invalid MAC pattern\n");
         goto end;
+    }
+
+    if (get_filter_essid()) {
+
+        if (essid_filter[0] && essid_filter[1]) {
+            cprintf(CRITICAL, "[X] ERROR: -e and -E options cannot be used together.\n");
+            goto end;
+        }
+
+        if (essid_filter[0] > 1 || essid_filter[1] > 1) {
+            cprintf(CRITICAL, "[X] ERROR: only one ESSID filter is permited.\n");
+            goto end;
+        }
     }
 
     /* If we're reading from a file, be sure we don't try to transmit probe requests */
@@ -358,6 +384,14 @@ void parse_wps_settings(const u_char *packet, struct pcap_pkthdr *header, char *
 
                 if (get_filter_mac() && strncasecmp(bssid, get_filter_mac(), strlen(get_filter_mac())) != 0) {
                     filter = 0;
+                }
+
+                if (get_filter_essid()) {
+                    if (!get_filter_strict_essid() && strncasecmp(ssid, get_filter_essid(), strlen(get_filter_essid())) != 0) {
+                        filter = 0;
+                    } else if (get_filter_strict_essid() && strncmp(ssid, get_filter_essid(), strlen(get_filter_essid())) != 0) {
+                        filter = 0;
+                    }
                 }
 
                 if (filter && !insert(bssid, ssid, wps, encryption, rssi)) {

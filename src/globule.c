@@ -615,3 +615,19 @@ void set_filter_mac(char * mac) {
 char * get_filter_mac() {
     return globule->mac_filter;
 }
+
+void set_filter_essid(char* essid) {
+    globule->essid_fiter = essid;
+}
+
+char * get_filter_essid() {
+    return globule->essid_fiter;
+}
+
+void set_filter_strict_essid(int value) {
+    globule->essid_strict = value;
+}
+
+int get_filter_strict_essid() {
+    return globule->essid_strict;
+}
