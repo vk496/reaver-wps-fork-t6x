@@ -580,7 +580,9 @@ void usage(char *prog) {
     fprintf(stderr, "\t-u, --survey                         Use survey mode [default]\n");
     fprintf(stderr, "\t-P, --output-piped                   Allows Wash output to be piped. Example. wash x|y|z...\n");
     fprintf(stderr, "\t-g, --get-chipset                    Pipes output and runs reaver alongside to get chipset\n");
-    fprintf(stderr, "\t-m, --mac                            Filter by mac address. Example. wash -m 00:11:22\n");
+    fprintf(stderr, "\t-m, --mac                            Filter by MAC address. Example. wash -i mon0 -m 00:11:22\n");
+    fprintf(stderr, "\t-e, --essid                          Filter by ESSID. Example. wash -i mon0 -e oNo\n");
+    fprintf(stderr, "\t-e, --essid-strict                   Same as -e but case sensitive. Example. wash -i mon0 -e ONO\n");
     fprintf(stderr, "\t-h, --help                           Show help\n");
 
     fprintf(stderr, "\nExample:\n");
