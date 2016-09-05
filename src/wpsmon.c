@@ -582,7 +582,7 @@ void usage(char *prog) {
     fprintf(stderr, "\t-g, --get-chipset                    Pipes output and runs reaver alongside to get chipset\n");
     fprintf(stderr, "\t-m, --mac                            Filter by MAC address. Example. wash -i mon0 -m 00:11:22\n");
     fprintf(stderr, "\t-e, --essid                          Filter by ESSID. Example. wash -i mon0 -e oNo\n");
-    fprintf(stderr, "\t-e, --essid-strict                   Same as -e but case sensitive. Example. wash -i mon0 -e ONO\n");
+    fprintf(stderr, "\t-E, --essid-strict                   Same as -e but case sensitive. Example. wash -i mon0 -E ONO\n");
     fprintf(stderr, "\t-h, --help                           Show help\n");
 
     fprintf(stderr, "\nExample:\n");
