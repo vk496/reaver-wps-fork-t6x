@@ -1,4 +1,4 @@
-# Overview
+# Overview  [![Build Status](https://travis-ci.org/vk496/reaver-wps-fork-t6x.svg?branch=master)](https://travis-ci.org/vk496/reaver-wps-fork-t6x)
 
 **Reaver** has been designed to be a robust and practical attack against **Wi-Fi Protected Setup (WPS)** registrar PINs in order to **recover WPA/WPA2 passphrases**. It has been tested against a wide variety of access points and WPS implementations.
 
