@@ -1,0 +1,17 @@
+language: c
+
+env:
+  - SRC_DIR=src
+  
+compiler:
+  - gcc
+
+install:
+ - sudo apt-get update
+ - sudo apt-get install libpcap-dev sqlite3 libsqlite3-dev
+
+script:
+  - cd $SRC_DIR
+  - ./configure
+  - make
+
