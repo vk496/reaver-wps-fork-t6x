@@ -386,7 +386,7 @@ void parse_wps_settings(const u_char *packet, struct pcap_pkthdr *header, char *
                     filter = 0;
                 }
 
-                if (get_filter_essid()) {
+                if (get_filter_essid() && ssid) {
                     if (!get_filter_strict_essid() && strncasecmp(ssid, get_filter_essid(), strlen(get_filter_essid())) != 0) {
                         filter = 0;
                     } else if (get_filter_strict_essid() && strncmp(ssid, get_filter_essid(), strlen(get_filter_essid())) != 0) {
