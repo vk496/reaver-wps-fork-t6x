@@ -594,17 +594,15 @@ int is_valid_filter_mac(const char* mac) {
 	int len = 0;
 	
 	if(strlen(mac)<=17)
-    while (*mac) {
+    	while (*mac) {
 		if (isxdigit(*mac)) {
-            i++;
-        } else if (*mac == ':' || *mac == '-') {
-			len++;
-            if (i == 0 || i / 2 - 1 != s)
-				
-                break;
-            ++s;
-        } else {
-            s = -1;
+            		i++;
+        	} else if (*mac == ':' || *mac == '-') {
+            		if (i == 0 || i / 2 - 1 != s)
+				break;
+            		++s;
+        	} else {
+            	s = -1;
         }
         ++mac;
     }
