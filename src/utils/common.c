@@ -591,12 +591,16 @@ int pingen_zyxel(char *mac, int add) {
 int is_valid_filter_mac(const char* mac) {
     int i = 0;
     int s = 0;
-
+	int len = 0;
+	
+	if(strlen(mac)<=17)
     while (*mac) {
-        if (isxdigit(*mac)) {
+		if (isxdigit(*mac)) {
             i++;
         } else if (*mac == ':' || *mac == '-') {
+			len++;
             if (i == 0 || i / 2 - 1 != s)
+				
                 break;
             ++s;
         } else {
@@ -604,6 +608,20 @@ int is_valid_filter_mac(const char* mac) {
         }
         ++mac;
     }
-
-    return (s == (i / 2) - 1) && (i <= 12);
+    return ((s == (i / 2) - 1) && (i <= 12));
+}
+/**
+ * Compare 2 macs allowing a wildcard character
+ * 
+ */
+int mac_wildcard(const char* mac, const char* mac_pattern, int length, char wildcard){
+	int i=0;
+	int ret_value = 0;
+	while((i<length )&&(!ret_value)){
+		if(toupper(mac[i])==toupper(mac_pattern[i]))ret_value = 0;
+		else if (toupper(mac_pattern[i])==wildcard) ret_value=0;
+		else ret_value = 1;
+		i++;
+	}
+	return ret_value;
 }
