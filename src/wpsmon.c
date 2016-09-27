@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
         { 0, 0, 0, 0}
     };
 
-
+	
     globule_init();
     //    sql_init();
     if (!sql_init()) {
@@ -95,6 +95,10 @@ int main(int argc, char *argv[]) {
                 source = PCAP_FILE;
                 break;
             case 'i':
+				if( getuid() != 0 ){
+					fprintf(stderr, "[X] ERROR: This option requires root privileges.\n");
+					goto end;		
+				}
                 set_iface(optarg);
                 break;
             case 'b':
@@ -170,7 +174,7 @@ int main(int argc, char *argv[]) {
         read_iface_mac();
     }
 
-    if (get_iface() && source == PCAP_FILE) {
+    if (get_iface() && source == PCAP_FILE && get_chipset_output!=1) {
         cprintf(CRITICAL, "[X] ERROR: -i and -f options cannot be used together.\n");
         usage(argv[0]);
         goto end;
@@ -324,6 +328,7 @@ void parse_wps_settings(const u_char *packet, struct pcap_pkthdr *header, char *
     char info_manufac[500];
     char info_modelnum[500];
     char info_modelserial[500];
+    char info_modelname[500];
 
     wps = malloc(sizeof (struct libwps_data));
     memset(wps, 0, sizeof (struct libwps_data));
@@ -382,7 +387,8 @@ void parse_wps_settings(const u_char *packet, struct pcap_pkthdr *header, char *
                 }
                 int filter = 1; //true
 
-                if (get_filter_mac() && strncasecmp(bssid, get_filter_mac(), strlen(get_filter_mac())) != 0) {
+                //if (get_filter_mac() && strncasecmp(bssid, get_filter_mac(), strlen(get_filter_mac())) != 0) {
+				if((get_filter_mac() && mac_wildcard (bssid, get_filter_mac(), strlen(get_filter_mac()),'X') != 0)){
                     filter = 0;
                 }
 
@@ -410,14 +416,18 @@ void parse_wps_settings(const u_char *packet, struct pcap_pkthdr *header, char *
                     //ideas made by kcdtv
 
                     if (get_chipset_output == 1)
-                        //if(1)
+                        
                     {
+						if(!get_iface()){
+							cprintf(INFO, "Option (-g) REQUIRES a device to be set with (-i)\n");
+                            exit(0);
+						}
                         if (c_fix == 0) {
                             //no use a fixed channel
                             cprintf(INFO, "Option (-g) REQUIRES a channel to be set with (-c)\n");
                             exit(0);
                         }
-
+						
                         FILE *fgchipset = NULL;
                         char cmd_chipset[4000];
                         char cmd_chipset_buf[4000];
@@ -432,10 +442,11 @@ void parse_wps_settings(const u_char *packet, struct pcap_pkthdr *header, char *
                         memset(info_manufac, 0, sizeof (info_manufac));
                         memset(info_modelnum, 0, sizeof (info_modelnum));
                         memset(info_modelserial, 0, sizeof (info_modelserial));
+                        memset(info_modelname, 0, sizeof (info_modelname));
 
 
 
-                        strcat(cmd_chipset, "reaver -0 -s y -vv -i "); //need option to stop reaver in m1 stage
+                        strcat(cmd_chipset, "reaver -0 -s y -vvv -L -a -i "); //need option to stop reaver in m1 stage
                         strcat(cmd_chipset, get_iface());
 
                         strcat(cmd_chipset, " -b ");
@@ -463,20 +474,27 @@ void parse_wps_settings(const u_char *packet, struct pcap_pkthdr *header, char *
                             aux_cmd_chipset = strstr(cmd_chipset_buf, "[P] WPS Manufacturer:");
                             if (aux_cmd_chipset != NULL) {
                                 //bug fix by alxchk
-                                strncpy(info_manufac, aux_cmd_chipset + 21, sizeof (info_manufac));
+                                strncpy(info_manufac, aux_cmd_chipset + 22, sizeof (info_manufac));
                             }
 
                             aux_cmd_chipset = strstr(cmd_chipset_buf, "[P] WPS Model Number:");
                             if (aux_cmd_chipset != NULL) {
                                 //bug fix by alxchk
-                                strncpy(info_modelnum, aux_cmd_chipset + 21, sizeof (info_modelnum));
+                                strncpy(info_modelnum, aux_cmd_chipset + 22, sizeof (info_modelnum));
+
+                            }
+                            
+                            aux_cmd_chipset = strstr(cmd_chipset_buf, "[P] WPS Model Name:");
+                            if (aux_cmd_chipset != NULL) {
+                                //bug fix by alxchk
+                                strncpy(info_modelname, strtok(aux_cmd_chipset + 20, "\n"), sizeof (info_modelname));
 
                             }
 
-                            aux_cmd_chipset = strstr(cmd_chipset_buf, "[P] WPS Model Serial Number:");
+                            aux_cmd_chipset = strstr(cmd_chipset_buf, "[P] Access Point Serial Number:");
                             if (aux_cmd_chipset != NULL) {
                                 //bug fix by alxchk
-                                strncpy(info_modelserial, aux_cmd_chipset + 28, sizeof (info_modelserial));
+                                strncpy(info_modelserial, aux_cmd_chipset + 32, sizeof (info_modelserial));
 
                             }
 
@@ -503,7 +521,7 @@ void parse_wps_settings(const u_char *packet, struct pcap_pkthdr *header, char *
                             cprintf(INFO, "%17s     %2d      %.2d      %d.%d       %s     %s\n", bssid, channel, rssi, (wps->version >> 4), (wps->version & 0x0F), lock_display, ssid);
                         } else {
                             if (get_chipset_output == 1) {
-                                cprintf(INFO, "%17s|%2d|%.2d|%d.%d|%s|%s|%s|%s|%s\n", bssid, channel, rssi, (wps->version >> 4), (wps->version & 0x0F), lock_display, ssid, info_manufac, info_modelnum, info_modelserial);
+                                cprintf(INFO, "%17s|%2d|%.2d|%d.%d|%s|%s|%s|%s|%s|%s\n", bssid, channel, rssi, (wps->version >> 4), (wps->version & 0x0F), lock_display, ssid, info_manufac, info_modelname, info_modelnum,info_modelserial);
 
                             } else {
                                 cprintf(INFO, "%17s|%2d|%.2d|%d.%d|%s|%s\n", bssid, channel, rssi, (wps->version >> 4), (wps->version & 0x0F), lock_display, ssid);
