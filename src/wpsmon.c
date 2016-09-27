@@ -95,10 +95,10 @@ int main(int argc, char *argv[]) {
                 source = PCAP_FILE;
                 break;
             case 'i':
-				if( getuid() != 0 ){
-					fprintf(stderr, "[X] ERROR: This option requires root privileges.\n");
-					goto end;		
-				}
+		if( getuid() != 0 ){
+			fprintf(stderr, "[X] ERROR: This option requires root privileges.\n");
+			goto end;		
+		}
                 set_iface(optarg);
                 break;
             case 'b':
@@ -418,10 +418,10 @@ void parse_wps_settings(const u_char *packet, struct pcap_pkthdr *header, char *
                     if (get_chipset_output == 1)
                         
                     {
-						if(!get_iface()){
-							cprintf(INFO, "Option (-g) REQUIRES a device to be set with (-i)\n");
-                            exit(0);
-						}
+			if(!get_iface()){
+				cprintf(INFO, "Option (-g) REQUIRES a device to be set with (-i)\n");
+                            	exit(0);
+			}
                         if (c_fix == 0) {
                             //no use a fixed channel
                             cprintf(INFO, "Option (-g) REQUIRES a channel to be set with (-c)\n");
