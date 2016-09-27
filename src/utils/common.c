@@ -613,7 +613,6 @@ int is_valid_filter_mac(const char* mac) {
  * 
  */
 int mac_wildcard(const char* mac, const char* mac_pattern, int length, char wildcard){
-	int i=0;
 	int ret_value = 0;
 	while((i<length )&&(!ret_value)){
 		if(toupper(mac[i])==toupper(mac_pattern[i]))ret_value = 0;
