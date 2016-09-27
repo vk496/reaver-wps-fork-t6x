@@ -388,7 +388,7 @@ void parse_wps_settings(const u_char *packet, struct pcap_pkthdr *header, char *
                 int filter = 1; //true
 
                 //if (get_filter_mac() && strncasecmp(bssid, get_filter_mac(), strlen(get_filter_mac())) != 0) {
-				if((get_filter_mac() && mac_wildcard (bssid, get_filter_mac(), strlen(get_filter_mac()),'X') != 0)){
+		if((get_filter_mac() && mac_wildcard (bssid, get_filter_mac(), strlen(get_filter_mac()),'X') != 0)){
                     filter = 0;
                 }
 
