@@ -40,7 +40,7 @@ int parse_wps_parameters(const u_char *packet, size_t len, struct libwps_data *w
             offset = rt_header->len + sizeof (struct dot11_frame_header) + sizeof (struct management_frame);
             data = (packet + offset);
 
-            ret_val = parse_wps_tag(data, len, wps);
+            ret_val = parse_wps_tag(data, data_len, wps);
         }
     }
 
