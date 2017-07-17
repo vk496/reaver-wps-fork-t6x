@@ -36,6 +36,8 @@
 
 #include "defs.h"
 #include "globule.h"
+#include <libwps.h>
+#include <linux/byteorder/little_endian.h>
 #include "argsparser.h"
 #include "sql.h"
 #include "builder.h"
