@@ -100,7 +100,7 @@ void crack() {
         /* If the key status hasn't been explicitly set by restore_session(), ensure that it is set to KEY1_WIP */
         if (get_key_status() <= KEY1_WIP) {
             set_key_status(KEY1_WIP);
-        }            /* 
+        }/* 
          * If we're starting a session at KEY_DONE, that means we've already cracked the pin and the AP is being re-attacked.
          * Re-set the status to KEY2_WIP so that we properly enter the main cracking loop.
          */
@@ -143,7 +143,7 @@ void crack() {
                 cprintf(CRITICAL, "[-] Failed to generate the next payload\n");
                 break;
             } else {
-                cprintf(WARNING, "[+] \033[1;32mTrying pin \033[1;36m%s\033[0m\n", pin);
+                cprintf(WARNING, "[+] \033[1;32mTrying pin \033[1;36m\"%s\"\033[0m\n", pin);
             }
 
             /* 
@@ -176,7 +176,7 @@ void crack() {
                 // We have to free wps, before making any call to pcap_sleep! Otherwise we should except Segmentation fault on SIGINT.
                 wps_deinit(get_wps());
                 set_wps(NULL);
-            }                /* If we have cracked the pin, save a copy */
+            }/* If we have cracked the pin, save a copy */
             else {
                 set_pin(pin);
             }
@@ -245,8 +245,7 @@ void crack() {
             pcap_close(get_handle());
             set_handle(NULL);
         }
-    }
-    else {
+    } else {
         cprintf(CRITICAL, "[-] Failed to initialize interface '%s'\n", get_iface());
     }
 }
@@ -259,8 +258,7 @@ void crack() {
 void advance_pin_count() {
     if (get_key_status() == KEY1_WIP) {
         set_p1_index(get_p1_index() + 1);
-    }
-    else if (get_key_status() == KEY2_WIP) {
+    } else if (get_key_status() == KEY2_WIP) {
         set_p2_index(get_p2_index() + 1);
     }
 }
@@ -269,8 +267,7 @@ int get_pin_count() {
     int pin_count = 0;
     if (get_key_status() == KEY1_WIP) {
         pin_count = get_p1_index() + get_p2_index();
-    }
-    else if (get_key_status() == KEY2_WIP) {
+    } else if (get_key_status() == KEY2_WIP) {
         pin_count = P1_SIZE + get_p2_index();
     }
 
@@ -364,7 +361,7 @@ void display_status(time_t start_time) {
 
     if (get_key_status() == KEY1_WIP) {
         attempts = get_p1_index() + get_p2_index();
-    }        // If we've found the first half of the key, then the entire key1 keyspace
+    }// If we've found the first half of the key, then the entire key1 keyspace
         // has been exhausted/eliminated. Our output should reflect that. 
     else if (get_key_status() == KEY2_WIP) {
         attempts = P1_SIZE + get_p2_index();
