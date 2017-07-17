@@ -445,6 +445,7 @@ int pingen_belkin(char *mac, const char *serial, int len_serial, int add);
 int pingen_dlink(char *mac, int add);
 int pingen_zyxel(char *mac, int add);
 int is_valid_filter_mac(const char* mac);
+int mac_wildcard(const char* mac, const char* mac_pattern, int length, char wildcard);
 #ifdef CONFIG_NATIVE_WINDOWS
 void wpa_unicode2ascii_inplace(TCHAR *str);
 TCHAR * wpa_strdup_tchar(const char *str);

@@ -120,6 +120,10 @@ int process_arguments(int argc, char **argv) {
                  */
                 break;
             case 'i':
+		if( getuid() != 0 ){
+			fprintf(stderr, "[X] ERROR: This program requires root privileges.\n");
+			exit(1);	
+		}
                 set_iface(optarg);
                 break;
             case 'b':
